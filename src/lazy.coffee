@@ -13,19 +13,16 @@ angular.module = (name,require,fn)->
   #获取module
   if !require
     return rs
-  #如果ng还未初始化，则直接调用ng的module方法
-  if !server.isBootstrap
-    appendModuleFn(rs)
-  else #已经初始化,未注册module
-    ;
-    #registerModule
+  #封装其对外暴露的方法
+  appendModuleFn(rs)
+
   return rs
 # 重写module的controller,provider,directive,filter方法
 appendModuleFn = (module)->
   #保存原有方法
   normal = {
     controller:module.controller
-    directive:module.drective
+    directive:module.directive
     provider:module.provider
     filter:module.filter
     run:module.run
@@ -34,7 +31,7 @@ appendModuleFn = (module)->
   fn为module原有方法(_controllerFn,_directiveFn,_providerFn,_filterFn,_runBlocks)
   ###
   invokeQueue = (fname,args)->
-    fn = !normal[fname]
+    fn = normal[fname]
     if !fn #如果没有，则说明不支持异步注册，调用module看看有没有
       n = module[fname]
       if n 
@@ -43,7 +40,7 @@ appendModuleFn = (module)->
         throw new ngMinErr("badmethod","no method {} name",fname)
     #ng未初始化(不管是否初始化，都先调用ng原有方法)
     r = fn.apply(fn,args)
-    if !server.isBootstrap #ng已初始化,注册相应对象(注册module时可先检查是否依赖项已经注册，如果依赖项没注册则等待所有依赖项注册完成后在注册)
+    if server.isBootstrap #ng已初始化,注册相应对象(注册module时可先检查是否依赖项已经注册，如果依赖项没注册则等待所有依赖项注册完成后在注册)
       server.register(module,fname,args);#注册
     return r
   
@@ -64,10 +61,10 @@ lazyModule.directive('body',['register',(register)->
   # restrict:'E'
   compile: ()->
     server.isBootstrap = true
-)]
+])
 
 #注入各种provider以便注册使用
-lazyModule.provider('registerProvider',($provide,$controllerProvider,$compileProvider,$filterProvider,$injector,$animateProvider)->
+lazyModule.provider('register',($provide,$controllerProvider,$compileProvider,$filterProvider,$injector,$animateProvider)->
   providers = {
     $provide
     $controllerProvider
