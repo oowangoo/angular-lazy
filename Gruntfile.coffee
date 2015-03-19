@@ -11,6 +11,12 @@ module.exports = (grunt)->
     pkg: grunt.file.readJSON("package.json")
     coffee:
       files:
+        cwd:"demo"
+        src:"**/*.coffee"
+        dest:"dist"
+        ext:".js"
+        expand:true
+      src:
         cwd:"src"
         src:"**/*.coffee"
         dest:"dist/javascripts"
@@ -23,12 +29,13 @@ module.exports = (grunt)->
         ext:".js"
         expand:true
     copy:
-      build:
+      html:
         files:[{
-          cwd:"src"
-          src:"**/*.js"
+          cwd:"demo"
+          src:"**/*.html"
+          dest:"dist"
+          ext:".html"
           expand:true
-          dest:"dist/javascripts"
         }]
     clean:[
       'test/.compiled'
@@ -45,49 +52,36 @@ module.exports = (grunt)->
         script: 'app.js',
         options:
           cwd: __dirname,
-          watch:['dist']
+          watch:['app.js','dist']
           env:             
             DEV: true,
             PORT: 3000,
             NODE_ENV: 'development',
             DEBUG: '*,-send,-connect:dispatcher,-express:router'
-         
-
-#    bump:
-#      options:
-#        files:['package.json','bower.json']
-#        commitFiles:['-a']
-#        pushTo:'gitlab'
-#    karma:
-#      unit:
-#        configFile:"karma.conf.js"
-#      backgrund:
-#        configFile:"karma.conf.js"
-#        options:
-#          singleRun:true
     watch:
       options:
         livereload: true
       src:
-        files:["src/**/*.coffee"]
+        files:["demo/**/*.coffee"]
         tasks:['coffee:files']
+      template:
+        files:["demo/**/*.html"]
+        tasks:['copy:html']
       test:
         files:['test/**/*.coffee']
         tasks:['coffee:test']
       compass: 
         files: ['dist/stylesheets/**/*.{scss,sass}']
         tasks: ['compass']
-
-    
+      views:
+        files:['views/**/*.html']
     concurrent: 
       options: 
         logConcurrentOutput: true
       dev: ['nodemon', 'watch']
     
   
-      
-
-  grunt.registerTask('build',['clean','coffee','compass','copy:build'])
+  grunt.registerTask('build',['clean','coffee','compass','copy:html'])
   grunt.registerTask('s',['build','concurrent:dev'])
 
   grunt.registerTask "default", ["build"]
