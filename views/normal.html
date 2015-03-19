@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html ng-app='normal'>
+<head >
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <base href="/normal/">
+  <title></title>
+  <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.css">
+  <script src="/jquery/jquery.js"></script>
+  <script src="/angular/angular.js"></script>
+  <script src="/javascripts/lazy.js"></script>
+  <script src="/angular-ui-router/release/angular-ui-router.js"></script>
+  <script src="javascripts/index.js"></script>
+  <script src="javascripts/main.js"></script>
+  <script src="javascripts/route.js"></script>
+</head>
+
+<body>
+  <h2>
+    正常加载ng模块.
+  </h2>
+  <nav>
+    <ul class="nav nav-tabs">
+      <li ui-sref-active="active"><a ui-sref="index" title="">view1</a></li>
+      <li ui-sref-active="active"><a ui-sref="indexLazy" title="">view2</a></li>
+    </ul>
+  </nav>
+  <div ui-view>
+    
+  </div>
+  <script src="//localhost:35729/livereload.js"></script>
+</body>
+</html>
