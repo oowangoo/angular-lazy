@@ -19,7 +19,7 @@ module.exports = (grunt)->
       test:
         cwd:"test"
         src:"**/*.coffee"
-        dest:"test.compiled"
+        dest:"test/.compiled"
         ext:".js"
         expand:true
     copy:
@@ -45,6 +45,7 @@ module.exports = (grunt)->
         script: 'app.js',
         options:
           cwd: __dirname,
+          watch:['dist']
           env:             
             DEV: true,
             PORT: 3000,
@@ -76,8 +77,7 @@ module.exports = (grunt)->
       compass: 
         files: ['dist/stylesheets/**/*.{scss,sass}']
         tasks: ['compass']
-      views:
-        files:['views/**/*.html']
+
     
     concurrent: 
       options: 

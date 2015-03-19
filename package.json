@@ -27,6 +27,8 @@
     "grunt-ngdocs": "~0.2.6",
     "grunt-bump": "^0.3.0",
     "grunt-contrib-compass": "^1.0.1",
-    "grunt-nodemon": "^0.4.0"
+    "grunt-nodemon": "^0.4.0",
+    "requirejs": "^2.1.16",
+    "karma-requirejs": "^0.2.2"
   }
 }

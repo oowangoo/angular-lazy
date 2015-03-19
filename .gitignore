@@ -3,3 +3,4 @@ vendor
 node_modules
 dist
 test/.compiled
+src/.DS_Store
