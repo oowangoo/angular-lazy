@@ -10,14 +10,15 @@
     "docs"
   ],
   "dependencies": {
-  },
-  "devDependencies": {
     "angular": "~1.3.x",
     "angular-mocks": "~1.3.x",
     "angular-scenario": "~1.3.x",
     "jquery": "~1.9.1",
     "bootstrap": "~3.3.2",
     "angular-ui-router": "~0.2.13",
-    "requirejs": "~2.1.16"
+    "requirejs": "~2.1.16",
+    "domReady": "~2.0.1"
+  },
+  "devDependencies": {
   }
 }
