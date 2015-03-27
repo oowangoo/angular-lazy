@@ -1,0 +1,25 @@
+requirejs.config({
+  baseUrl:"/requireJS/javascripts"
+  paths:
+    angular:"/angular/angular"
+    jquery:"/jquery/jquery"
+    uiRouter:"/angular-ui-router/release/angular-ui-router"
+    lazyPlugin:"/javascripts/lazy"
+    domReady:"/domReady/domReady"
+  shim:
+    jquery:
+      exports:'jquery'
+    angular:
+      deps:['jquery']
+      exports:'angular'
+    lazyPlugin:
+      deps:['angular']
+    uiRouter:
+      deps:['angular']
+
+})
+define(['require','jquery','angular','lazyPlugin','uiRouter','app','route'],(require,jquery,ng)->
+  require(['domReady'],(document)->
+    ng.bootstrap(document,['require'])
+  )
+)
