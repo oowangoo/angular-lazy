@@ -81,7 +81,7 @@ lazyModule.provider('register',($provide,$controllerProvider,$compileProvider,$f
     if !rFn
       throw new ngMinErr("badFunction","unsupproted register {0}",fname)
     #注册
-    rFn(args) 
+    rFn.apply(rFn,args) 
 
   server.register = mainRegister
 
