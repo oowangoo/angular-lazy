@@ -23,15 +23,23 @@ app.get('/', function(request, response,next) {
 app.get('/normal', function(request, response) {
   response.render('normal.html')
 });
-app.get('/normal/*', function(request, response) {
+app.get('/normal/view1', function(request, response) {
   response.render('normal.html')
 });
+app.get('/normal/view2', function(request, response) {
+  response.render('normal.html')
+});
+
 app.get('/requireJS', function(request, response) {
   response.render('require.html')
 });
-app.get('/requireJS/*', function(request, response) {
+app.get('/requireJS/view1', function(request, response) {
   response.render('require.html')
 });
+app.get('/requireJS/view2', function(request, response) {
+  response.render('require.html')
+});
+
 var port = process.env.PORT || 5000;
 app.listen(port, function() {
   console.log("Listening on " + port);
