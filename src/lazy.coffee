@@ -37,7 +37,7 @@ appendModuleFn = (module)->
       if n 
         return n.apply(n,args)
       else #如果module没有则说明ng本身并没有此方法
-        throw new ngMinErr("badmethod","no method {} name",fname)
+        throw new Error("badmethod no method #{fname} name")
     #ng未初始化(不管是否初始化，都先调用ng原有方法)
     r = fn.apply(fn,args)
     if server.isBootstrap #ng已初始化,注册相应对象(注册module时可先检查是否依赖项已经注册，如果依赖项没注册则等待所有依赖项注册完成后在注册)
@@ -79,7 +79,7 @@ lazyModule.provider('register',($provide,$controllerProvider,$compileProvider,$f
   mainRegister = (module,fname,args)->
     rFn = registerFn[fname]
     if !rFn
-      throw new ngMinErr("badFunction","unsupproted register {0}",fname)
+      throw new Error("badFunction unsupproted register #{fname}")
     #注册
     rFn.apply(rFn,args) 
 
@@ -89,7 +89,7 @@ lazyModule.provider('register',($provide,$controllerProvider,$compileProvider,$f
   invokeLater = (pname, method, insertMethod, queue)->
     provider = providers[pname]
     unless provider
-      throw new ngMinErr("badProvider","unsupported provider {0}",pname)
+      throw new Error("badProvider unsupported provider #{pname}")
     return ()->
       #执行注册操作
       provider[method].apply(provider,arguments);
