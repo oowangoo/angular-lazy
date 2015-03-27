@@ -10,13 +10,13 @@ module.exports = (grunt)->
   grunt.initConfig
     pkg: grunt.file.readJSON("package.json")
     coffee:
-      files:
+      demo:
         cwd:"demo"
         src:"**/*.coffee"
         dest:"dist"
         ext:".js"
         expand:true
-      src:
+      lazy:
         cwd:"src"
         src:"**/*.coffee"
         dest:"dist/javascripts"
@@ -61,9 +61,12 @@ module.exports = (grunt)->
     watch:
       options:
         livereload: true
-      src:
+      lazy:
+        files:['src/**/*.coffee']
+        tasks:['coffee:lazy']
+      demo:
         files:["demo/**/*.coffee"]
-        tasks:['coffee:files']
+        tasks:['coffee:demo']
       template:
         files:["demo/**/*.html"]
         tasks:['copy:html']
