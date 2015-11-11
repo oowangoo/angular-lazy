@@ -13,13 +13,13 @@ module.exports = (grunt)->
       demo:
         cwd:"demo"
         src:"**/*.coffee"
-        dest:"dist"
+        dest:"dest"
         ext:".js"
         expand:true
       lazy:
         cwd:"src"
         src:"**/*.coffee"
-        dest:"dist/javascripts"
+        dest:"dest/javascripts"
         ext:".js"
         expand:true
       test:
@@ -33,26 +33,41 @@ module.exports = (grunt)->
         files:[{
           cwd:"demo"
           src:"**/*.html"
-          dest:"dist"
+          dest:"dest"
           ext:".html"
           expand:true
         }]
     clean:[
       'test/.compiled'
-      'dist'
+      'dest'
     ]
+    ngmin:{
+      lazy:
+        expand: true,
+        cwd:"dest/javascripts"
+        src:"*.js"
+        dest:"dest/javascripts"
+    }
+    uglify:{
+      options:
+        sourceMap: true
+        sourceMapIncludeSources:true
+      lazy:
+        files:
+          "dest/javascripts/lazy.min.js":["dest/javascripts/lazy.js"]
+    }
     compass:
       files:
         options:
           sassDir:'stylesheets'
-          cssDir:'dist/stylesheets'
+          cssDir:'dest/stylesheets'
           require: 'animate'
     nodemon:
       dev:
         script: 'app.js',
         options:
           cwd: __dirname,
-          watch:['app.js','dist']
+          watch:['app.js','dest']
           env:             
             DEV: true,
             PORT: 3000,
@@ -74,7 +89,7 @@ module.exports = (grunt)->
         files:['test/**/*.coffee']
         tasks:['coffee:test']
       compass: 
-        files: ['dist/stylesheets/**/*.{scss,sass}']
+        files: ['dest/stylesheets/**/*.{scss,sass}']
         tasks: ['compass']
       views:
         files:['views/**/*.html']
@@ -83,7 +98,7 @@ module.exports = (grunt)->
         logConcurrentOutput: true
       dev: ['nodemon', 'watch']
     
-  
+  grunt.registerTask("r",['clean','coffee:lazy','ngmin','uglify'])
   grunt.registerTask('build',['clean','coffee','compass','copy:html'])
   grunt.registerTask('s',['build','concurrent:dev'])
 
