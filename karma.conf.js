@@ -10,12 +10,16 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['jasmine', 'requirejs'],
+    frameworks: ['jasmine'],
 
 
     // list of files / patterns to load in the browser
     files: [
-      'test-main.js'
+      "vendor/angular/angular.js",
+      "vendor/angular-mocks/angular-mocks.js",
+      "vendor/angular-ui-router/release/angular-ui-router.js",
+      ".compiled/src/*.js",
+      ".compiled/test/unit/*.js"
     ],
 
 
