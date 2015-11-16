@@ -1,11 +1,19 @@
 register = angular.module 'angular.lazy.register',['ng']
 #是否已经初始化
 register.isBootstrap = false;
+# 已经注册列表
+registerCache = {
+  modules   : ['ng']
+  providers : []
+}
+register.isRegister = isRegister = (moduleName)->
+  return registerCache.modules.indexOf(moduleName) isnt -1 
 
 ModuleListenList = ['controller','directive','provider','filter','run']
 
 #入口返回替换过的module对象    
 moduleProxy = (module)->
+  registerCache.modules.push module.name
   for method in ModuleListenList
     module[method] = createInvoke(module,method)
   module.$isProxy = true
@@ -24,16 +32,31 @@ createInvoke = (module,method)->
     return result
 
   return invokeQueue
-
+#添加module 的requires对象
+appendModuleRequires = (moduleName,requires)->
+  module = angular.module(moduleName)
+  begin = module.requires.length || 0
+  end = requires.length - 1
+  
+  while(begin < end )
+    req = requires[begin]
+    module.requires.push req
+    begin++
+  return module
 
 coverNgModule = ()->
   normalModule = angular.module
   angular.module = (name,requires,fn)->
+    #todo 如果是注册，则需要判断是否注册过，如果没，调用ng，如果注册过，则将不同的依赖添加进原来对象
+    if requires and isRegister(name)
+      return appendModuleRequires(name,requires)
     module = normalModule(name,requires,fn)
-    unless requires 
+    if module.$isProxy 
       return module
     #注册module，返回代理对象
     return moduleProxy(module)
+#重写angular pbulic method
+coverNgModule()
 
 #依赖只是单纯为了让server初始化
 register.directive("body",[()->
@@ -42,6 +65,8 @@ register.directive("body",[()->
       register.isBootstrap = true
 ])
 .provider("register",($provide,$controllerProvider,$compileProvider,$filterProvider,$injector,$animateProvider)->
+  #所有已经注册过的对象,#{name}Provider = provider
+
   providers = {
     $provide
     $controllerProvider
@@ -79,7 +104,9 @@ register.directive("body",[()->
     config: invokeLater('$injector', 'invoke', 'push', "_configBlocks")
     run:runLater()
   }
+  # public for register 
 
+  
   register.regiter = (module,method,args)->
     rFn = registerFunction[method]
     if !rFn 
