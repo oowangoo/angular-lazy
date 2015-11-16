@@ -4,12 +4,11 @@ register.isBootstrap = false;
 # 已经注册列表
 registerCache = {
   modules   : ['ng']
-  providers : []
 }
 register.isRegister = isRegister = (moduleName)->
   return registerCache.modules.indexOf(moduleName) isnt -1 
 
-ModuleListenList = ['controller','directive','provider','filter','run']
+ModuleListenList = ['provider','factory','service','value','constant','animation','filter','controller','directive','config','run']
 
 #入口返回替换过的module对象    
 moduleProxy = (module)->
@@ -35,13 +34,12 @@ createInvoke = (module,method)->
 #添加module 的requires对象
 appendModuleRequires = (moduleName,requires)->
   module = angular.module(moduleName)
-  begin = module.requires.length || 0
-  end = requires.length - 1
-  
-  while(begin < end )
-    req = requires[begin]
-    module.requires.push req
-    begin++
+  baseRequires = module.requires
+  appendList = []
+  for req in requires
+    if baseRequires.indexOf(req) is -1
+      appendList.push req
+  Array.prototype.push.apply(baseRequires,appendList)
   return module
 
 coverNgModule = ()->
@@ -56,18 +54,20 @@ coverNgModule = ()->
     #注册module，返回代理对象
     return moduleProxy(module)
 #重写angular pbulic method
-coverNgModule()
 
 #依赖只是单纯为了让server初始化
 register.directive("body",[()->
   return {
+    restrict: "E"
     compile: ()->
       register.isBootstrap = true
   }
 ])
 .provider("register",($provide,$controllerProvider,$compileProvider,$filterProvider,$injector,$animateProvider)->
   #所有已经注册过的对象,#{name}Provider = provider
+  providerCache = {
 
+  }
   providers = {
     $provide
     $controllerProvider
@@ -84,13 +84,18 @@ register.directive("body",[()->
     unless provider
       throw new Error("badProvider unsupported provider #{pname}")
     return ()->
+      # ng本身如果重名则会以后来的为准  判断是否已经注册过
+      # if ((name = arguments[0]) and !providerCache[name])
+      #   providerCache[name] = true;
+
       #执行注册操作
       provider[method].apply(provider,arguments);
-  
+      return
   runLater = ()->
     return ()->
       instance = providers.getInstanceInjector()
-      instance.invoke(arguments)
+      args = Array.prototype.slice.call(arguments,0);
+      instance.invoke(args)
 
   registerFunction = {
     provider:invokeLater('$provide', 'provider')
@@ -108,7 +113,7 @@ register.directive("body",[()->
   # public for register 
 
   
-  register.regiter = (module,method,args)->
+  register.register = (module,method,args)->
     rFn = registerFunction[method]
     if !rFn 
       throw new Error("badFunctioin unsupproted register #{method}")
@@ -122,8 +127,9 @@ register.directive("body",[()->
   ]
   return @
 )
-.run(['register',(register)->
+.run(['register',(service)->
   #初始化register
 ])
 
+coverNgModule()
 
