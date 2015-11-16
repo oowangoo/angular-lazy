@@ -60,9 +60,10 @@ coverNgModule()
 
 #依赖只是单纯为了让server初始化
 register.directive("body",[()->
-  return 
+  return {
     compile: ()->
       register.isBootstrap = true
+  }
 ])
 .provider("register",($provide,$controllerProvider,$compileProvider,$filterProvider,$injector,$animateProvider)->
   #所有已经注册过的对象,#{name}Provider = provider
@@ -81,7 +82,7 @@ register.directive("body",[()->
   invokeLater = (pname,method)->
     provider = providers[pname]
     unless provider
-      throw new Error("badProvider unsupported provider #{pname}"
+      throw new Error("badProvider unsupported provider #{pname}")
     return ()->
       #执行注册操作
       provider[method].apply(provider,arguments);
