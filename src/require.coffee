@@ -61,7 +61,7 @@ module.factory("$fileCache",["$cacheFactory",($cacheFactory)->
         @onScriptError = ()->
           deferred.reject('bad request'); 
           $rootScope.$apply() 
-          angular.isFunction(provide.onError) and provide.onError()
+          angular.isFunction(provider.onError) and provider.onError()
           return
         if !filePath
           deferred.reject('empty path')
