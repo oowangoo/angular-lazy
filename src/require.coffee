@@ -1,5 +1,5 @@
 module = angular.module 'angular.lazy.require',['ng']
-
+head = document.getElementsByTagName("head")[0]
 requireConfig = {}
 module.setConfig = (config)->
   requireConfig = angular.extend(requireConfig,config) 
@@ -40,32 +40,37 @@ module.factory("$fileCache",["$cacheFactory",($cacheFactory)->
   provider.getFile = ()->
     ;
 
-  provider.$get = ['$q','$fileCache',($q,$fileCache)->
+  provider.$get = ['$q','$fileCache','$rootScope',($q,fileCache,$rootScope)->
     class ScriptLoad
       constructor:(filePath)->
         deferred = $q.defer()
         
         @onScriptLoad = ()->
-          deferred.resolve();
+          deferred.resolve(123);
           fileCache.put(filePath,'has cache')
+          $rootScope.$apply() #需要调用$apply 才能将结果传播
           return
 
         @onScriptError = ()->
-          deferred.reject(); 
-          provide.onError()
+          deferred.reject('bad request'); 
+          $rootScope.$apply() 
+          angular.isFunction(provide.onError) and provide.onError()
           return
-
-        if filePath || fileCache.get(filePath)
+        if !filePath
+          deferred.reject('empty path')
+        else if fileCache.get(filePath)
           deferred.resolve();
         else 
           @loadScript(filePath)
 
-        @promise = deferred.promise 
+        @$promise = deferred.promise.then(()->
+          console.log("sdasdfas")
+        )
         return @
       loadScript:(url)->
         onScriptError = @onScriptError.bind(@)
         onScriptLoad = @onScriptLoad.bind(@)
-        node = createNode();
+        node = @createNode();
 
         node.addEventListener('load',onScriptLoad)
         node.addEventListener('error',onScriptError)
@@ -77,10 +82,11 @@ module.factory("$fileCache",["$cacheFactory",($cacheFactory)->
         node.type = "text/javascript"
         node.charset = 'utf-8'
         node.async = true
+        node.setAttribute and node.setAttribute("ng-lazy","load")
         return node 
 
-    provider.getFile = (filepath)->
-      return new ScriptLoad(filepath).promise
+    return provider.getFile = (filepath)->
+      return new ScriptLoad(filepath).$promise
 
   ]
 
