@@ -23,10 +23,19 @@ module.exports = (grunt)->
         dest:".compiled/test"
         ext:".js"
         expand:true
+      dest:
+        src:".compile/angular-lazy.coffee"
+        dest:".compiled"
+        ext:".js"
+        expand:true
     clean:[
       '.compiled'
       'dest'
     ]
+    concat:
+      dest:
+        src:["/src/*.coffee"]
+        dest:".compile/angular-lazy.coffee"
     ngmin:{
       lazy:
         expand: true,
@@ -43,6 +52,8 @@ module.exports = (grunt)->
     karma:
       unit:
         configFile:"karma.conf.js"
+      release:
+        configFile:"karma-release.conf.js"
     nodemon:
       dev:
         script: 'app.js',
@@ -66,7 +77,7 @@ module.exports = (grunt)->
       options: 
         logConcurrentOutput: true
       dev: ['nodemon', 'watch']
-      test: ['watch','nodemon','karma:unit']
+      test: ['watch','karma:unit']
     
 
   grunt.registerTask "build",[
@@ -77,4 +88,11 @@ module.exports = (grunt)->
   grunt.registerTask "default", ["build"]
 
   grunt.registerTask("test",['build','concurrent:test'])
+
+  grunt.registerTask("buildRelease",[
+    'concat:dest'
+    "coffee:dest"
+  ])
+  grunt.registerTask('release',['buildRelease','karma:release',''])
+
   return 

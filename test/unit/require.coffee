@@ -16,13 +16,14 @@ describe("require",()->
   
   it("getFile",(done)->
     inject(($fileLoad,$rootScope)->
-      p = $fileLoad("http://localhost:3000/test/module.js")
+      p = $fileLoad("/module.js")
       expect(p.then).toBeDefined()
       p.then(()->
         console.log("xxxx")
         expect(window.lazyLoad).toBeTruthy()
       ).catch(()->
         console.error("can't load http://localhost:3000/test/module.js")
+        expect(window.lazyLoad).toBeTruthy()
       ).finally(()->
         done()
       )
