@@ -48,7 +48,6 @@ module.exports = (grunt)->
         script: 'app.js',
         options:
           cwd: __dirname,
-          watch:['app.js','dest']
           env:             
             DEV: true,
             PORT: 3000,
@@ -67,7 +66,7 @@ module.exports = (grunt)->
       options: 
         logConcurrentOutput: true
       dev: ['nodemon', 'watch']
-      test: ['watch','karma:unit']
+      test: ['watch','nodemon','karma:unit']
     
 
   grunt.registerTask "build",[
