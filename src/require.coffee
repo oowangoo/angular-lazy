@@ -2,7 +2,10 @@ module = angular.module 'angular.lazy.require',['ng']
 head = document.getElementsByTagName("head")[0]
 requireConfig = {}
 module.setConfig = (config)->
-  requireConfig = angular.extend(requireConfig,config) 
+  unless config 
+    requireConfig = {}
+  else 
+    requireConfig = angular.extend(requireConfig,config) 
   return module
 
 module.factory("$fileCache",["$cacheFactory",($cacheFactory)->
@@ -11,13 +14,16 @@ module.factory("$fileCache",["$cacheFactory",($cacheFactory)->
 .provider("$fileLoad",[()->
   #return paths array 
   getRequireList = (config)->
-    return [] unless config
     return config if angular.isArray(config)
-    return [].push(config) if angular.isString(config)
-    if angular.isObject(config)
+    list = []
+    if !config
+      ;
+    else if angular.isString(config)
+      list.push(config)
+    else if angular.isObject(config)
       list = []
       angular.forEach(config,(v,k)->
-        list.concat(getRequireList(v))
+        Array.prototype.push.apply(list,getRequireList(v))
       )
     return list
 
@@ -37,6 +43,7 @@ module.factory("$fileCache",["$cacheFactory",($cacheFactory)->
     requireList = getRequireList(requireList)
     return requireList
 
+  #defined in $get 
   provider.getFile = ()->
     ;
 
