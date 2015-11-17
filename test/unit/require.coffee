@@ -14,7 +14,7 @@ describe("require",()->
   #   expect(resolvedValue).toEqual(123); # in then function 
   # ))
   
-  it("load",(done)->
+  it("getFile",(done)->
     inject(($fileLoad,$rootScope)->
       p = $fileLoad("http://localhost:3000/test/module.js")
       expect(p.then).toBeDefined()
