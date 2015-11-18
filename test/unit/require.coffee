@@ -28,12 +28,8 @@ describe("require",()->
         done()
       )
       $rootScope.$digest();
-      return 
-    )
-  )
-  it("getFile Twice",(done)->
-    inject(($fileLoad,$rootScope)->
-      path = "/base/.compiled/test/module.js"
+      
+      # twice 
       p = $fileLoad(path)
       expect(p.then).toBeDefined()
       p.then(()->
@@ -45,7 +41,6 @@ describe("require",()->
         done()
       )
       $rootScope.$digest();
-      return 
     )
   )
   describe('provider',()->

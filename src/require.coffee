@@ -51,28 +51,32 @@ requireModule.factory("$fileCache",["$cacheFactory",($cacheFactory)->
     class ScriptLoad
       constructor:(filePath)->
         deferred = $q.defer()
-        
+        @$promise = deferred.promise
+
         @onScriptLoad = ()->
           deferred.resolve(123);
-          fileCache.put(filePath,'has cache')
+          fileCache.put(filePath,@$promise)
           $rootScope.$apply() #需要调用$apply 才能将结果传播
           return
 
         @onScriptError = ()->
           deferred.reject('bad request'); 
+          fileCache.remove(filePath)
           $rootScope.$apply() 
           angular.isFunction(provider.onError) and provider.onError()
           return
         if !filePath
           deferred.reject('empty path')
-        else if fileCache.get(filePath)
-          deferred.resolve();
+        else if (p = fileCache.get(filePath))
+          p.then(()->
+            deferred.resolve();
+          ).catch(()->
+            deferred.reject('bad request'); 
+          )
         else 
+          fileCache.put(filePath,@$promise)
           @loadScript(filePath)
 
-        @$promise = deferred.promise.then(()->
-          console.log("sdasdfas")
-        )
         return @
       loadScript:(url)->
         onScriptError = @onScriptError.bind(@)
