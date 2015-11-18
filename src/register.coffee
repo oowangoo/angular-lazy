@@ -63,70 +63,77 @@ register.directive("body",[()->
       register.isBootstrap = true
   }
 ])
-.provider("register",($provide,$controllerProvider,$compileProvider,$filterProvider,$injector,$animateProvider)->
-  #所有已经注册过的对象,#{name}Provider = provider
-  providerCache = {
+.provider("register",[
+  "$provide",
+  "$controllerProvider",
+  "$compileProvider",
+  "$filterProvider",
+  "$injector",
+  "$animateProvider",
+  ($provide,$controllerProvider,$compileProvider,$filterProvider,$injector,$animateProvider)->
+    #所有已经注册过的对象,#{name}Provider = provider
+    providerCache = {
 
-  }
-  providers = {
-    $provide
-    $controllerProvider
-    $compileProvider
-    $filterProvider
-    $injector
-    $animateProvider
-    getInstanceInjector:()->
-      return angular.injector()
-  }
+    }
+    providers = {
+      $provide
+      $controllerProvider
+      $compileProvider
+      $filterProvider
+      $injector
+      $animateProvider
+      getInstanceInjector:()->
+        return angular.injector()
+    }
 
-  invokeLater = (pname,method)->
-    provider = providers[pname]
-    unless provider
-      throw new Error("badProvider unsupported provider #{pname}")
-    return ()->
-      # ng本身如果重名则会以后来的为准  判断是否已经注册过
-      # if ((name = arguments[0]) and !providerCache[name])
-      #   providerCache[name] = true;
+    invokeLater = (pname,method)->
+      provider = providers[pname]
+      unless provider
+        throw new Error("badProvider unsupported provider #{pname}")
+      return ()->
+        # ng本身如果重名则会以后来的为准  判断是否已经注册过
+        # if ((name = arguments[0]) and !providerCache[name])
+        #   providerCache[name] = true;
 
-      #执行注册操作
-      provider[method].apply(provider,arguments);
+        #执行注册操作
+        provider[method].apply(provider,arguments);
+        return
+    runLater = ()->
+      return ()->
+        instance = providers.getInstanceInjector()
+        args = Array.prototype.slice.call(arguments,0);
+        instance.invoke(args)
+
+    registerFunction = {
+      provider:invokeLater('$provide', 'provider')
+      factory: invokeLater('$provide', 'factory')
+      service: invokeLater('$provide', 'service')
+      value: invokeLater('$provide', 'value')
+      constant: invokeLater('$provide', 'constant', 'unshift')
+      animation: invokeLater('$animateProvider', 'register')
+      filter: invokeLater('$filterProvider', 'register')
+      controller: invokeLater('$controllerProvider', 'register')
+      directive: invokeLater('$compileProvider', 'directive')
+      config: invokeLater('$injector', 'invoke', 'push', "_configBlocks")
+      run:runLater()
+    }
+    # public for register 
+
+    
+    register.register = (module,method,args)->
+      rFn = registerFunction[method]
+      if !rFn 
+        throw new Error("badFunctioin unsupproted register #{method}")
+      rFn.apply(this,args)
       return
-  runLater = ()->
-    return ()->
-      instance = providers.getInstanceInjector()
-      args = Array.prototype.slice.call(arguments,0);
-      instance.invoke(args)
-
-  registerFunction = {
-    provider:invokeLater('$provide', 'provider')
-    factory: invokeLater('$provide', 'factory')
-    service: invokeLater('$provide', 'service')
-    value: invokeLater('$provide', 'value')
-    constant: invokeLater('$provide', 'constant', 'unshift')
-    animation: invokeLater('$animateProvider', 'register')
-    filter: invokeLater('$filterProvider', 'register')
-    controller: invokeLater('$controllerProvider', 'register')
-    directive: invokeLater('$compileProvider', 'directive')
-    config: invokeLater('$injector', 'invoke', 'push', "_configBlocks")
-    run:runLater()
-  }
-  # public for register 
-
-  
-  register.register = (module,method,args)->
-    rFn = registerFunction[method]
-    if !rFn 
-      throw new Error("badFunctioin unsupproted register #{method}")
-    rFn.apply(this,args)
-    return
-  @$get = ['$rootElement',($rootElement)->
-    providers.getInstanceInjector = ()->
-      return if instanceInjector
-      instanceInjector = $rootElement.data('$injector') || angular.injector()
-    return register.register
-  ]
-  return @
-)
+    @$get = ['$rootElement',($rootElement)->
+      providers.getInstanceInjector = ()->
+        return if instanceInjector
+        instanceInjector = $rootElement.data('$injector') || angular.injector()
+      return register.register
+    ]
+    return @
+])
 .run(['register',(service)->
   #初始化register
 ])
