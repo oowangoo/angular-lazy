@@ -19,7 +19,8 @@ module.exports = function(config) {
       "vendor/angular-mocks/angular-mocks.js",
       "vendor/angular-ui-router/release/angular-ui-router.js",
       ".compiled/src/*.js",
-      ".compiled/test/unit/*.js"
+      ".compiled/test/unit/*.js",
+      ".compiled/test/module.js"
     ],
 
 
