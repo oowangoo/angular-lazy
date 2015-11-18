@@ -221,12 +221,15 @@
           var ScriptLoad;
           ScriptLoad = (function() {
             function ScriptLoad(filePath) {
-              var deferred, p;
+              var deferred, that;
+              if (filePath && (that = fileCache.get(filePath))) {
+                return that;
+              }
               deferred = $q.defer();
               this.$promise = deferred.promise;
               this.onScriptLoad = function() {
                 deferred.resolve(123);
-                fileCache.put(filePath, this.$promise);
+                fileCache.put(filePath, this);
                 $rootScope.$apply();
               };
               this.onScriptError = function() {
@@ -237,14 +240,8 @@
               };
               if (!filePath) {
                 deferred.reject('empty path');
-              } else if ((p = fileCache.get(filePath))) {
-                p.then(function() {
-                  return deferred.resolve();
-                })["catch"](function() {
-                  return deferred.reject('bad request');
-                });
               } else {
-                fileCache.put(filePath, this.$promise);
+                fileCache.put(filePath, this);
                 this.loadScript(filePath);
               }
               return this;
