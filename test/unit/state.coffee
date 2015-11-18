@@ -10,6 +10,19 @@ describe("state",()->
     fileLoad = $fileLoadProvider
     return
   ))
+  it("module set config",inject(($state)->
+    rmod = angular.module 'angular.lazy.require'
+    rmod.setConfig({
+      project:"somefilepath"
+    })
+    stateProvider.state("project",{
+      url:"/project"
+    })
+    p = $state.get("project")
+    expect(p).toBeDefined()
+    expect(p.resolve).toBeDefined()
+    expect(angular.isFunction(p.resolve.loadJSFile0)).toBeTruthy()
+  ))
   it("resolve by config",inject(($state)->
     fileLoad.setConfig({
       project:"somefilepath"
