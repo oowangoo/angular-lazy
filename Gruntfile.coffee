@@ -28,25 +28,36 @@ module.exports = (grunt)->
         dest:"."
         ext:".js"
         expand:true
-    clean:[
-      '.compiled'
-      'dest'
-    ]
+    clean:
+      build:['.compiled']
+      release:['dest']
     concat:
       dest:
         src:["src/*.coffee"]
         dest:".compiled/angular-lazy.coffee"
-    ngmin:{
-      lazy:
-        expand: true,
-        cwd:"dest/javascripts"
-        src:"*.js"
-        dest:"dest/javascripts"
-    }
+    copy:
+      dest:
+        expand:true
+        cwd:".compiled"
+        src:['src/*.*','angular-lazy.*','!angular-lazy.coffee']
+        dest:"dest"
     uglify:{
       options:
+        banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' + '<%= grunt.template.today("yyyy-mm-dd") %> */'
         sourceMap: true
         sourceMapIncludeSources:true
+      lazy:
+        files:[{
+          expand: true,
+          cwd:".compiled/src"
+          ext:".min.js"
+          src:"**/*.js"
+          dest:".compiled/src"
+        }]
+      dest:
+        files:{
+          '.compiled/angular-lazy.min.js':".compiled/angular-lazy.js"
+        }
 
     }
     karma:
@@ -81,7 +92,7 @@ module.exports = (grunt)->
     
 
   grunt.registerTask "build",[
-    'clean'
+    'clean:build'
     "coffee:lazy"
     "coffee:test"
   ]
@@ -90,11 +101,50 @@ module.exports = (grunt)->
   grunt.registerTask("test",['build','concurrent:test'])
 
   grunt.registerTask("buildRelease",[
-    'clean'
+    'clean:build'
     'concat:dest'
+    "coffee:lazy" # only to copy dest
     "coffee:dest"
     "coffee:test"
+    "uglify:lazy"
+    "uglify:dest"
+    "rsm"
   ])
-  grunt.registerTask('release',['buildRelease','karma:release'])
+  grunt.registerTask('release',['buildRelease','karma:release',"clean:release",'copy:dest'])
 
+  grunt.registerTask('rsm','拷贝.map 文件，并读取js生成.js->.map对照表,同时删除min.js的source map引用',()->
+    SOURMAP_REG = /\/\/# sourceMappingURL=(\S+)/;
+    JS_REG = /\.min\.js$/;
+    MAP_REG = /\.map$/;
+    initRegExp = ()->
+      SOURMAP_REG.lastIndex = 0;
+      JS_REG.lastIndex = 0;
+      MAP_REG.lastIndex = 0;
+    postMappingJSON = (files)->
+      mapping = {};
+      postDir = (dir)->   
+        grunt.file.recurse(dir,(abspath, rootdir, subdir, filename)->
+          postFile(abspath)
+        );
+      postFile = (filepath)->
+        initRegExp()
+
+        if (JS_REG.test(filepath))
+          content = grunt.file.read(filepath);
+          RegExp.$1 = '';
+          if (!SOURMAP_REG.test(content)) 
+            return;
+          #移除最底下sourcemap 注释
+          content = content.replace(SOURMAP_REG, '');
+          grunt.file.write(filepath,content,{encoding:'utf-8'});
+
+      if grunt.file.isDir(files)
+        postDir(files)
+      else if grunt.file.isFile(files)
+        postFile(files)
+      return ;
+
+    src = postMappingJSON('.compiled/src')
+    lazy = postMappingJSON('.compiled/angular-lazy.min.js')
+  );
   return 

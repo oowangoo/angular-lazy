@@ -18,7 +18,7 @@ module.exports = function(config) {
       "vendor/angular/angular.js",
       "vendor/angular-mocks/angular-mocks.js",
       "vendor/angular-ui-router/release/angular-ui-router.js",
-      ".compiled/angular-lazy.js",
+      ".compiled/angular-lazy.min.js",
       ".compiled/test/unit/*.js",
       ".compiled/test/module.js"
     ],
