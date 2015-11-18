@@ -221,28 +221,32 @@
           var ScriptLoad;
           ScriptLoad = (function() {
             function ScriptLoad(filePath) {
-              var deferred;
+              var deferred, p;
               deferred = $q.defer();
+              this.$promise = deferred.promise;
               this.onScriptLoad = function() {
                 deferred.resolve(123);
-                fileCache.put(filePath, 'has cache');
+                fileCache.put(filePath, this.$promise);
                 $rootScope.$apply();
               };
               this.onScriptError = function() {
                 deferred.reject('bad request');
+                fileCache.remove(filePath);
                 $rootScope.$apply();
                 angular.isFunction(provider.onError) && provider.onError();
               };
               if (!filePath) {
                 deferred.reject('empty path');
-              } else if (fileCache.get(filePath)) {
-                deferred.resolve();
+              } else if ((p = fileCache.get(filePath))) {
+                p.then(function() {
+                  return deferred.resolve();
+                })["catch"](function() {
+                  return deferred.reject('bad request');
+                });
               } else {
+                fileCache.put(filePath, this.$promise);
                 this.loadScript(filePath);
               }
-              this.$promise = deferred.promise.then(function() {
-                return console.log("sdasdfas");
-              });
               return this;
             }
 
