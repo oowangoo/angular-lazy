@@ -1,14 +1,14 @@
-module = angular.module 'angular.lazy.require',['ng']
+requireModule = angular.module 'angular.lazy.require',['ng']
 head = document.getElementsByTagName("head")[0]
 requireConfig = {}
-module.setConfig = (config)->
+requireModule.setConfig = (config)->
   unless config 
     requireConfig = {}
   else 
     requireConfig = angular.extend(requireConfig,config) 
-  return module
+  return requireModule
 
-module.factory("$fileCache",["$cacheFactory",($cacheFactory)->
+requireModule.factory("$fileCache",["$cacheFactory",($cacheFactory)->
   return $cacheFactory("fileCache")
 ])
 .provider("$fileLoad",[()->
@@ -28,7 +28,7 @@ module.factory("$fileCache",["$cacheFactory",($cacheFactory)->
     return list
 
   getFilePath = (fileName,relativePath)->
-    baseRequire = module.findRequire()
+    baseRequire = requireModule.findRequire()
     if relativePath 
       baseRequire = baseRequire[relativePath]
     return '' unless baseRequire
@@ -36,7 +36,7 @@ module.factory("$fileCache",["$cacheFactory",($cacheFactory)->
 
   provider = @
   provider.onError = angular.noop
-  provider.setConfig = module.setConfig
+  provider.setConfig = requireModule.setConfig
 
   provider.findRequire = (stateName)->
     requireList = requireConfig[stateName] || []

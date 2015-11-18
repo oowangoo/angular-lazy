@@ -1,6 +1,6 @@
-module = angular.module 'angular.lazy.state',['ng','ui.router','angular.lazy.require','angular.lazy.register']
+stateModule = angular.module 'angular.lazy.state',['ng','ui.router','angular.lazy.require','angular.lazy.register']
 # decorator $stateProvider.state
-module.config(['$stateProvider','$fileLoadProvider',($stateProvider,$fileLoadProvider)->
+stateModule.config(['$stateProvider','$fileLoadProvider',($stateProvider,$fileLoadProvider)->
   registerState = $stateProvider.state
   #overflow register
   $stateProvider.state = (name,config)->
