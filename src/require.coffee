@@ -50,12 +50,15 @@ requireModule.factory("$fileCache",["$cacheFactory",($cacheFactory)->
   provider.$get = ['$q','$fileCache','$rootScope',($q,fileCache,$rootScope)->
     class ScriptLoad
       constructor:(filePath)->
+        if filePath and (that = fileCache.get(filePath))
+          return that
+
         deferred = $q.defer()
         @$promise = deferred.promise
 
         @onScriptLoad = ()->
           deferred.resolve(123);
-          fileCache.put(filePath,@$promise)
+          fileCache.put(filePath,@)
           $rootScope.$apply() #需要调用$apply 才能将结果传播
           return
 
@@ -67,14 +70,8 @@ requireModule.factory("$fileCache",["$cacheFactory",($cacheFactory)->
           return
         if !filePath
           deferred.reject('empty path')
-        else if (p = fileCache.get(filePath))
-          p.then(()->
-            deferred.resolve();
-          ).catch(()->
-            deferred.reject('bad request'); 
-          )
         else 
-          fileCache.put(filePath,@$promise)
+          fileCache.put(filePath,@)
           @loadScript(filePath)
 
         return @
