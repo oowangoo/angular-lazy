@@ -41,7 +41,7 @@ module.exports = (grunt)->
         cwd:".compiled"
         src:['src/*.*','angular-lazy.*','!angular-lazy.coffee']
         dest:"dest"
-    uglify:{
+    uglify:
       options:
         banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' + '<%= grunt.template.today("yyyy-mm-dd") %> */'
         sourceMap: true
@@ -58,8 +58,6 @@ module.exports = (grunt)->
         files:{
           '.compiled/angular-lazy.min.js':".compiled/angular-lazy.js"
         }
-
-    }
     karma:
       unit:
         configFile:"karma.conf.js"
@@ -89,7 +87,16 @@ module.exports = (grunt)->
         logConcurrentOutput: true
       dev: ['nodemon', 'watch']
       test: ['watch','karma:unit']
-    
+    bump:
+      options:
+        files:[]
+        commit: true,
+        commitMessage: 'Release <%= pkg.version%>',
+        commitFiles: ['dest/'],
+        createTag: true,
+        tagName: '<%= pkg.version%>',
+        tagMessage: 'Version <%= pkg.version%>'
+        push:false
 
   grunt.registerTask "build",[
     'clean:build'
@@ -110,7 +117,13 @@ module.exports = (grunt)->
     "uglify:dest"
     "rsm"
   ])
-  grunt.registerTask('release',['buildRelease','karma:release',"clean:release",'copy:dest'])
+  grunt.registerTask("prepare-release",()->
+    bower = grunt.file.readJSON('bower.json')
+    version = bower.version
+    if(version isnt grunt.config('pkg.version'))
+      throw 'Version mismatch in bower.json';
+  )
+  grunt.registerTask('release',['buildRelease','karma:release',"clean:release",'copy:dest','prepare-release','bump'])
 
   grunt.registerTask('rsm','拷贝.map 文件，并读取js生成.js->.map对照表,同时删除min.js的source map引用',()->
     SOURMAP_REG = /\/\/# sourceMappingURL=(\S+)/;
@@ -147,4 +160,5 @@ module.exports = (grunt)->
     src = postMappingJSON('.compiled/src')
     lazy = postMappingJSON('.compiled/angular-lazy.min.js')
   );
+ 
   return 
