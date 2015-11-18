@@ -20,7 +20,23 @@ describe("require",()->
       p = $fileLoad(path)
       expect(p.then).toBeDefined()
       p.then(()->
-        console.log("xxxx")
+        expect(!window.lazyLoad).toBeTruthy()
+      ).catch(()->
+        console.error(["can't load #{path}"])
+        expect(false).toBeTruthy()
+      ).finally(()->
+        done()
+      )
+      $rootScope.$digest();
+      return 
+    )
+  )
+  it("getFile Twice",(done)->
+    inject(($fileLoad,$rootScope)->
+      path = "/base/.compiled/test/module.js"
+      p = $fileLoad(path)
+      expect(p.then).toBeDefined()
+      p.then(()->
         expect(!window.lazyLoad).toBeTruthy()
       ).catch(()->
         console.error(["can't load #{path}"])
