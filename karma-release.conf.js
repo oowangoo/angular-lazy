@@ -5,7 +5,7 @@ module.exports = function(config) {
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
-    basePath: '/test',
+    basePath: '',
 
 
     // frameworks to use
@@ -18,8 +18,9 @@ module.exports = function(config) {
       "vendor/angular/angular.js",
       "vendor/angular-mocks/angular-mocks.js",
       "vendor/angular-ui-router/release/angular-ui-router.js",
-      ".compiled/src/angular-lazy.js",
-      ".compiled/test/unit/*.js"
+      ".compiled/angular-lazy.js",
+      ".compiled/test/unit/*.js",
+      ".compiled/test/module.js"
     ],
 
 
@@ -54,7 +55,7 @@ module.exports = function(config) {
 
 
     // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: true,
+    autoWatch: false,
 
 
     // start these browsers

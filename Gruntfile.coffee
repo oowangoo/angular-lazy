@@ -24,8 +24,8 @@ module.exports = (grunt)->
         ext:".js"
         expand:true
       dest:
-        src:".compile/angular-lazy.coffee"
-        dest:".compiled"
+        src:".compiled/angular-lazy.coffee"
+        dest:"."
         ext:".js"
         expand:true
     clean:[
@@ -34,8 +34,8 @@ module.exports = (grunt)->
     ]
     concat:
       dest:
-        src:["/src/*.coffee"]
-        dest:".compile/angular-lazy.coffee"
+        src:["src/*.coffee"]
+        dest:".compiled/angular-lazy.coffee"
     ngmin:{
       lazy:
         expand: true,
@@ -90,9 +90,11 @@ module.exports = (grunt)->
   grunt.registerTask("test",['build','concurrent:test'])
 
   grunt.registerTask("buildRelease",[
+    'clean'
     'concat:dest'
     "coffee:dest"
+    "coffee:test"
   ])
-  grunt.registerTask('release',['buildRelease','karma:release',''])
+  grunt.registerTask('release',['buildRelease','karma:release'])
 
   return 
