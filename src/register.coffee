@@ -71,6 +71,7 @@ register.directive("body",[()->
   "$injector",
   "$animateProvider",
   ($provide,$controllerProvider,$compileProvider,$filterProvider,$injector,$animateProvider)->
+    self = @
     #所有已经注册过的对象,#{name}Provider = provider
     providerCache = {
 
@@ -92,11 +93,14 @@ register.directive("body",[()->
         throw new Error("badProvider unsupported provider #{pname}")
       return ()->
         # ng本身如果重名则会以后来的为准  判断是否已经注册过
-        # if ((name = arguments[0]) and !providerCache[name])
-        #   providerCache[name] = true;
-
+        name = arguments[0] 
+        cacheName = "#{method}#{name}"
+        if self.enableDistinst and providerCache[cacheName] 
+          return 
         #执行注册操作
-        provider[method].apply(provider,arguments);
+        rs = provider[method].apply(provider,arguments);
+        providerCache[cacheName] = rs 
+
         return
     runLater = ()->
       return ()->
