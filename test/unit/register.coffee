@@ -221,4 +221,45 @@ describe("register",()->
       expect(isRun).toBeTruthy()
     ))
   )
+
+  describe("enableDistinst",()->
+    provider = null;
+    beforeEach(module((registerProvider)->
+      provider = registerProvider
+      expect(provider).toBeDefined()
+      return
+    ))
+    it("true",inject(()->
+      provider.enableDistinst =  true
+      m = angular.module(moduleName)
+      service1 = ()->
+        @name = 'service1'
+        return @
+      service2 = ()->
+        @name = "service2"
+        return @
+      m.service("someService",service1)
+      m.service("someService",service2)
+      inject((someService)->
+        expect(someService.name).toBe("service1")
+      )
+    ))
+    it("false",inject(()->
+      provider.enableDistinst =  false
+      m = angular.module(moduleName)
+      service1 = ()->
+        @name = 'service1'
+        return @
+      service2 = ()->
+        @name = "service2"
+        return @
+      m.service("someService",service1)
+      m.service("someService",service2)
+      inject((someService)->
+        expect(someService.name).toBe("service2")
+      )
+    ))
+    return
+  )
+  return 
 )
