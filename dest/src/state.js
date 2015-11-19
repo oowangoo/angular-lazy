@@ -8,18 +8,24 @@
       var registerState;
       registerState = $stateProvider.state;
       return $stateProvider.state = function(name, config) {
-        var jsRequire, resolve;
+        var jsRequire, loadFile, resolve;
         if (config.requirejs) {
           jsRequire = config.requirejs;
         } else {
           jsRequire = $fileLoadProvider.findRequire(name);
         }
         if (jsRequire && (resolve = config.resolve || {})) {
+          loadFile = [];
           angular.forEach(jsRequire, function(v, k) {
-            resolve["loadJSFile" + k] = function() {
+            var resolveName;
+            resolveName = "loadJSFile" + k;
+            resolve[resolveName] = function() {
               return $fileLoadProvider.getFile(v, name);
             };
+            loadFile.push(resolveName);
           });
+          loadFile.push(angular.noop);
+          resolve.loadFile = loadFile;
           config.resolve = resolve;
         }
         return registerState.apply(this, arguments);
