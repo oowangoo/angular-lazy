@@ -94,14 +94,28 @@ register.directive("body",[()->
       unless provider
         throw new Error("badProvider unsupported provider #{pname}")
       return ()->
-        # ng本身如果重名则会以后来的为准  判断是否已经注册过
+        # ng本身如果重名则会以后来的为准  判断是否已经注册过   如果改服务已经被使用由于ng的cache你获取到的永远是第一个，directive除外
         name = arguments[0] 
         cacheName = "#{method}#{name}"
-        if self.enableDistinst and providerCache[cacheName] 
-          return 
+        cacheArray = (method is 'directive')
+
+        fn = arguments[1]
+        if angular.isArray(fn)
+          fn = fn[fn.length - 1]
+
+        if (cache = providerCache[cacheName] )
+          if(cacheArray)
+            if cache.indexOf(fn) > -1
+              return
+          else 
+            return 
         #执行注册操作
         rs = provider[method].apply(provider,arguments);
-        providerCache[cacheName] = rs 
+        if cacheArray
+          providerCache[cacheName] = providerCache[cacheName] || []
+          providerCache[cacheName].push(fn)
+        else 
+          providerCache[cacheName] = true 
 
         return
     runLater = ()->
