@@ -1,5 +1,5 @@
 (function() {
-  var ModuleListenList, appendModuleRequires, coverNgModule, createInvoke, head, isRegister, moduleProxy, register, registerCache, requireConfig, requireModule, stateModule;
+  var ModuleListenList, appendModuleRequires, coverNgModule, createInvoke, head, isRegister, moduleProxy, nextTick, register, registerCache, requireConfig, requireModule, stateModule;
 
   register = angular.module('angular.lazy.register', ['ng']);
 
@@ -74,6 +74,10 @@
     };
   };
 
+  nextTick = function(fn, delay) {
+    return setTimeout(fn, delay || 0);
+  };
+
   register.directive("body", [
     function() {
       return {
@@ -117,11 +121,12 @@
         };
       };
       runLater = function() {
-        return function() {
-          var args, instance;
+        return function(block) {
+          var instance;
           instance = providers.getInstanceInjector();
-          args = Array.prototype.slice.call(arguments, 0);
-          return instance.invoke(args);
+          return nextTick(function() {
+            return instance.invoke(block);
+          });
         };
       };
       registerFunction = {
@@ -147,12 +152,13 @@
       };
       this.$get = [
         '$rootElement', function($rootElement) {
+          var instanceInjector;
+          instanceInjector = null;
           providers.getInstanceInjector = function() {
-            var instanceInjector;
-            if (instanceInjector) {
-              return;
+            if (!instanceInjector) {
+              instanceInjector = $rootElement.data('$injector') || angular.injector();
             }
-            return instanceInjector = $rootElement.data('$injector') || angular.injector();
+            return instanceInjector;
           };
           return register.register;
         }
@@ -237,7 +243,7 @@
               this.$promise = deferred.promise;
               this.onScriptLoad = function() {
                 deferred.resolve(123);
-                fileCache.put(filePath, this);
+                fileCache.put(filePath, true);
                 $rootScope.$apply();
               };
               this.onScriptError = function() {
@@ -280,7 +286,13 @@
 
           })();
           return provider.getFile = function(filepath) {
-            return new ScriptLoad(filepath).$promise;
+            var load;
+            load = new ScriptLoad(filepath);
+            if (load.$promise) {
+              return load.$promise;
+            } else {
+              return load;
+            }
           };
         }
       ];

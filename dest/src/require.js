@@ -75,7 +75,7 @@
               this.$promise = deferred.promise;
               this.onScriptLoad = function() {
                 deferred.resolve(123);
-                fileCache.put(filePath, this);
+                fileCache.put(filePath, true);
                 $rootScope.$apply();
               };
               this.onScriptError = function() {
@@ -118,7 +118,13 @@
 
           })();
           return provider.getFile = function(filepath) {
-            return new ScriptLoad(filepath).$promise;
+            var load;
+            load = new ScriptLoad(filepath);
+            if (load.$promise) {
+              return load.$promise;
+            } else {
+              return load;
+            }
           };
         }
       ];
