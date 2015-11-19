@@ -212,14 +212,25 @@ describe("register",()->
     it("normal",inject(()->
       expect(normalRun).toBeTruthy()
     ))
-    it("lazy",inject(()->
-      m = angular.module(moduleName)
-      isRun = false
-      m.run(()->
-        isRun = true
+    it("lazy",(done)->
+      inject(()->
+        angular.module(moduleName).run(()->
+          done()
+        )
       )
-      expect(isRun).toBeTruthy()
-    ))
+    )
+    # 正常情况从rootElement种能够拿刀inject，而测试时拿不到
+    # it("mini",inject(()->
+    #   m = angular.module("normal.test")
+    #   isRun = false
+    #   m.service("$runService",()->
+    #     return {}
+    #   )
+    #   m.run(['register',(register)->
+    #     isRun = true
+    #   ])
+    #   expect(isRun).toBeTruthy()
+    # ))
   )
 
   describe("enableDistinst",()->
