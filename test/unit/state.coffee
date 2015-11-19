@@ -50,5 +50,32 @@ describe("state",()->
     expect(angular.isFunction(d.resolve.loadJSFilefile)).toBeTruthy()
 
   ))
+  it("some resolve require load file ",(done)->
+    #when here stateResovle is true
+    inject(($state,$rootScope)->
+      stateResolve = false
+      stateProvider.state("demo",{
+        url:"/project"
+        resolve:{
+          project:['loadFile',()->
+            #stateResovle must false
+            expect(window.stateResovle).toBeFalsy()
+            done()
+          ]
+        }
+        requirejs:{
+          file:"/base/.compiled/test/empty.js"
+        }
+      })
+      d = $state.get("demo")
+
+      expect(d).toBeDefined()
+      expect(d.resolve).toBeDefined()
+      expect(angular.isFunction(d.resolve.loadJSFilefile)).toBeTruthy()
+      expect(d.resolve.loadFile).toBeDefined()
+
+      $state.go("demo")
+    )
+  )
   return
 )

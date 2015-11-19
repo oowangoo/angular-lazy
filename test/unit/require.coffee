@@ -13,7 +13,9 @@ describe("require",()->
   #   $rootScope.$apply();
   #   expect(resolvedValue).toEqual(123); # in then function 
   # ))
-  
+  beforeEach(()->
+    window.lazyLoad = true
+  )
   it("getFile",(done)->
     inject(($fileLoad,$rootScope)->
       path = "/base/.compiled/test/module.js"
