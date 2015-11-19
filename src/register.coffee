@@ -55,6 +55,8 @@ coverNgModule = ()->
     return moduleProxy(module)
 #重写angular pbulic method
 
+nextTick = (fn,delay)->
+  setTimeout(fn,delay || 0)
 #依赖只是单纯为了让server初始化
 register.directive("body",[()->
   return {
@@ -103,10 +105,12 @@ register.directive("body",[()->
 
         return
     runLater = ()->
-      return ()->
+      return (block)->
         instance = providers.getInstanceInjector()
-        args = Array.prototype.slice.call(arguments,0);
-        instance.invoke(args)
+        # args = Array.prototype.slice.call(arguments,0);
+        nextTick(()->
+          instance.invoke(block)
+        )
 
     registerFunction = {
       provider:invokeLater('$provide', 'provider')
@@ -131,9 +135,12 @@ register.directive("body",[()->
       rFn.apply(this,args)
       return
     @$get = ['$rootElement',($rootElement)->
+      instanceInjector = null
       providers.getInstanceInjector = ()->
-        return if instanceInjector
-        instanceInjector = $rootElement.data('$injector') || angular.injector()
+        # 直接angular.injector()拿刀的injector是没有任何service，正常情况下是从rootElement中拿到injector
+        unless instanceInjector
+          instanceInjector = $rootElement.data('$injector') || angular.injector()
+        return instanceInjector
       return register.register
     ]
     return @
