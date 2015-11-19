@@ -240,7 +240,7 @@ describe("register",()->
       expect(provider).toBeDefined()
       return
     ))
-    it("true",inject(()->
+    xit("true",inject(()->
       provider.enableDistinst =  true
       m = angular.module(moduleName)
       service1 = ()->
@@ -255,7 +255,7 @@ describe("register",()->
         expect(someService.name).toBe("service1")
       )
     ))
-    it("false",inject(()->
+    xit("false",inject(()->
       provider.enableDistinst =  false
       m = angular.module(moduleName)
       service1 = ()->
@@ -270,7 +270,53 @@ describe("register",()->
         expect(someService.name).toBe("service2")
       )
     ))
-    return
+    describe("directive",()->
+      it("mutli",inject(($compile, $rootScope)->
+        provider.enableDistinst =  false
+        m = angular.module(moduleName)
+        num = 0
+        m.directive("sm",()->
+          return {
+            restrict:"A"
+            link:(scope)->
+              num++
+              return
+          }
+        ).directive("sm",()->
+          return {
+            restrict:"A"
+            link:(scope)->
+              num++
+              return
+          }
+        )
+        scope =  $rootScope.$new()
+        link = $compile('<div sm></div>')
+        link(scope)
+        console.log(num)
+        expect(num).toBe(2)
+      ))
+
+      it("once",inject(($compile, $rootScope)->
+        provider.enableDistinst =  true
+        m = angular.module(moduleName)
+        num = 0
+        d = ()->
+          return {
+            restrict:"A"
+            link:(scope)->
+              num++
+              return
+          }
+        m.directive("sm",d).directive("sm",d)
+        scope =  $rootScope.$new()
+        link = $compile('<div sm></div>')
+        link(scope)
+        console.log(num)
+        expect(num).toBe(1)
+      ))
+      return
+    )
   )
   return 
 )
