@@ -58,7 +58,7 @@ requireModule.factory("$fileCache",["$cacheFactory",($cacheFactory)->
 
         @onScriptLoad = ()->
           deferred.resolve(123);
-          fileCache.put(filePath,@)
+          fileCache.put(filePath,true)
           $rootScope.$apply() #需要调用$apply 才能将结果传播
           return
 
@@ -94,7 +94,8 @@ requireModule.factory("$fileCache",["$cacheFactory",($cacheFactory)->
         return node 
 
     return provider.getFile = (filepath)->
-      return new ScriptLoad(filepath).$promise
+      load = new ScriptLoad(filepath)
+      if load.$promise then load.$promise else load
 
   ]
 
