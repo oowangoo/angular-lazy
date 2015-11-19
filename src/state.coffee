@@ -11,11 +11,16 @@ stateModule.config(['$stateProvider','$fileLoadProvider',($stateProvider,$fileLo
       jsRequire = $fileLoadProvider.findRequire(name)
 
     if jsRequire and (resolve = config.resolve || {})
+      loadFile = []
       angular.forEach(jsRequire,(v,k)->
-        resolve["loadJSFile#{k}"] = ()->
+        resolveName = "loadJSFile#{k}"
+        resolve[resolveName] = ()->
           return $fileLoadProvider.getFile(v,name)
+        loadFile.push(resolveName)
         return
-      ) 
+      )
+      loadFile.push(angular.noop)
+      resolve.loadFile = loadFile
       config.resolve = resolve
     return registerState.apply(this,arguments)
 ])
