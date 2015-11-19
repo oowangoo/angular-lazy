@@ -85,7 +85,8 @@
     }
   ]).provider("register", [
     "$provide", "$controllerProvider", "$compileProvider", "$filterProvider", "$injector", "$animateProvider", function($provide, $controllerProvider, $compileProvider, $filterProvider, $injector, $animateProvider) {
-      var invokeLater, providerCache, providers, registerFunction, runLater;
+      var invokeLater, providerCache, providers, registerFunction, runLater, self;
+      self = this;
       providerCache = {};
       providers = {
         $provide: $provide,
@@ -105,7 +106,14 @@
           throw new Error("badProvider unsupported provider " + pname);
         }
         return function() {
-          provider[method].apply(provider, arguments);
+          var cacheName, name, rs;
+          name = arguments[0];
+          cacheName = "" + method + name;
+          if (self.enableDistinst && providerCache[cacheName]) {
+            return;
+          }
+          rs = provider[method].apply(provider, arguments);
+          providerCache[cacheName] = rs;
         };
       };
       runLater = function() {
