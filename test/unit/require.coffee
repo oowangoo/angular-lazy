@@ -85,9 +85,12 @@ describe("require",()->
     it("object",inject(()->
       fileProvider.setConfig(C)
       array = fileProvider.findRequire("project")
-      expect(array.length).toBe(2)
-      expect(array).toContain("highchart-path")
-      expect(array).toContain("highchart-ng-path")
+      expect(array.highchart).toBeDefined()
+      expect(array.highchart.highchart).toBe("highchart-path")
+      expect(array.highchart["highchart-ng"]).toBe("highchart-ng-path")
+      # expect(array.length).toBe(2)
+      # expect(array).toContain("highchart-path")
+      # expect(array).toContain("highchart-ng-path")
       return
     ))
     return
