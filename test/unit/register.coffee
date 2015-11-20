@@ -197,12 +197,12 @@ describe("register",()->
     it("lazy",inject(()->
       m = angular.module(moduleName)
       isRunConfig = false
-      m.provider("testProvider",()->
+      m.provider("testProvider2",()->
         @name = test
         @$get = ()->
           return {msg:test}
         return @
-      ).config((testProviderProvider)->
+      ).config((testProvider2Provider)->
         isRunConfig = true
       )
       expect(isRunConfig).toBeTruthy()
@@ -240,7 +240,7 @@ describe("register",()->
       expect(provider).toBeDefined()
       return
     ))
-    xit("true",inject(()->
+    it("service",inject(()->
       provider.enableDistinst =  true
       m = angular.module(moduleName)
       service1 = ()->
@@ -255,24 +255,8 @@ describe("register",()->
         expect(someService.name).toBe("service1")
       )
     ))
-    xit("false",inject(()->
-      provider.enableDistinst =  false
-      m = angular.module(moduleName)
-      service1 = ()->
-        @name = 'service1'
-        return @
-      service2 = ()->
-        @name = "service2"
-        return @
-      m.service("someService",service1)
-      m.service("someService",service2)
-      inject((someService)->
-        expect(someService.name).toBe("service2")
-      )
-    ))
     describe("directive",()->
       it("mutli",inject(($compile, $rootScope)->
-        provider.enableDistinst =  false
         m = angular.module(moduleName)
         num = 0
         m.directive("sm",()->
@@ -286,6 +270,7 @@ describe("register",()->
           return {
             restrict:"A"
             link:(scope)->
+              'smthing other'
               num++
               return
           }
@@ -308,9 +293,9 @@ describe("register",()->
               num++
               return
           }
-        m.directive("sm",d).directive("sm",d)
+        m.directive("sm2",d).directive("sm2",d)
         scope =  $rootScope.$new()
-        link = $compile('<div sm></div>')
+        link = $compile('<div sm2></div>')
         link(scope)
         console.log(num)
         expect(num).toBe(1)
