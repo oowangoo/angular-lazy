@@ -118,12 +118,24 @@
 
           })();
           return provider.getFile = function(filepath) {
-            var load;
-            load = new ScriptLoad(filepath);
-            if (load.$promise) {
-              return load.$promise;
+            var load, promise;
+            if (angular.isArray(filepath)) {
+              promise = [];
+              angular.forEach(filepath, function(file) {
+                var load;
+                load = new ScriptLoad(file);
+                if (load && load.$promise) {
+                  return promise.push(load.$promise);
+                }
+              });
+              return $q.all(promise);
             } else {
-              return load;
+              load = new ScriptLoad(filepath);
+              if (load.$promise) {
+                return load.$promise;
+              } else {
+                return load;
+              }
             }
           };
         }
