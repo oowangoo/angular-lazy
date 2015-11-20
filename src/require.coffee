@@ -21,9 +21,9 @@ requireModule.factory("$fileCache",["$cacheFactory",($cacheFactory)->
     else if angular.isString(config)
       list.push(config)
     else if angular.isObject(config)
-      list = []
+      list = {}
       angular.forEach(config,(v,k)->
-        Array.prototype.push.apply(list,getRequireList(v))
+        list[k] = v
       )
     return list
 
