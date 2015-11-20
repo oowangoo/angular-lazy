@@ -2,17 +2,80 @@ register = angular.module 'angular.lazy.register',['ng']
 #是否已经初始化
 register.isBootstrap = false;
 # 已经注册列表
-registerCache = {
-  modules   : ['ng']
-}
 register.isRegister = isRegister = (moduleName)->
-  return registerCache.modules.indexOf(moduleName) isnt -1 
+  return !!registerCache.module[moduleName]
 
 ModuleListenList = ['provider','factory','service','value','constant','animation','filter','controller','directive','config','run']
 
+registerCache = {
+  module   : {'ng':true}
+}
+initRegisterCache = ()->
+  registerCache = {
+    module   : {'ng':true}
+  }
+  for method in ModuleListenList
+    registerCache[method] = {}
+
+initRegisterCache()
+
+#注册缓存
+getQueueArguments = (args)->
+  name = args[0]
+  fn = args[1] 
+
+  #只有1个参数时，一定是function
+  unless fn
+    fn = name 
+    name = '@'
+
+  if angular.isArray(fn)
+    fn = fn[fn.length - 1]
+  return {
+    name
+    fn
+  }
+
+# FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
+# STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+
+anonFn = (fn)->
+  # fnText = fn.toString().replace(STRIP_COMMENTS, '')
+  # args = fnText.match(FN_ARGS)
+  # if (args)
+  #   return args[1] + fnText.length
+  # else 
+  #   return fnText
+  return fn.toString()
+
+hitCache = (method , args)->
+  caches = registerCache[method]
+  args = getQueueArguments(args)
+  name = args.name
+  fn = args.fn
+
+  cache = caches[name]
+  return false unless cache
+  if !angular.isArray(cache)
+    return true
+  #cache is array
+  return cache.indexOf(anonFn(fn)) > -1 
+
+putRegisterCache = (method ,args)->
+  caches = registerCache[method]
+  args = getQueueArguments(args) 
+  name = args.name
+  fn = args.fn
+  if ['run','config','directive'].indexOf(method) > -1
+    caches[name] = caches[name] || []
+    caches[name].push(anonFn(fn))
+  else 
+    caches[name] = true
+  return
+
 #入口返回替换过的module对象    
 moduleProxy = (module)->
-  registerCache.modules.push module.name
+  registerCache.module[module.name] = true
   for method in ModuleListenList
     module[method] = createInvoke(module,method)
   module.$isProxy = true
@@ -24,10 +87,19 @@ createInvoke = (module,method)->
     throw new Error("badmethod  no method #{method} name")
 
   invokeQueue = ()->
+    #判断重复
+    # ng本身如果重名则会以后来的为准  判断是否已经注册过   如果改服务已经被使用由于ng的cache你获取到的永远是第一个，directive除外
+    if hitCache(method,arguments)
+      return module
+
     result = normal.apply(module,arguments)
+
+    putRegisterCache(method,arguments)
+
     #已经初始化，则需要帮他注册
     if register.isBootstrap
       register.register(module,method,arguments)
+
     return result
 
   return invokeQueue
@@ -89,33 +161,16 @@ register.directive("body",[()->
         return angular.injector()
     }
 
+
     invokeLater = (pname,method)->
       provider = providers[pname]
       unless provider
         throw new Error("badProvider unsupported provider #{pname}")
       return ()->
-        # ng本身如果重名则会以后来的为准  判断是否已经注册过   如果改服务已经被使用由于ng的cache你获取到的永远是第一个，directive除外
-        name = arguments[0] 
-        cacheName = "#{method}#{name}"
-        cacheArray = (method is 'directive')
-
-        fn = arguments[1]
-        if angular.isArray(fn)
-          fn = fn[fn.length - 1]
-
-        if (cache = providerCache[cacheName] )
-          if(cacheArray)
-            if cache.indexOf(fn) > -1
-              return
-          else 
-            return 
+        
         #执行注册操作
         rs = provider[method].apply(provider,arguments);
-        if cacheArray
-          providerCache[cacheName] = providerCache[cacheName] || []
-          providerCache[cacheName].push(fn)
-        else 
-          providerCache[cacheName] = true 
+
 
         return
     runLater = ()->
