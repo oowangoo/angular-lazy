@@ -94,8 +94,17 @@ requireModule.factory("$fileCache",["$cacheFactory",($cacheFactory)->
         return node 
 
     return provider.getFile = (filepath)->
-      load = new ScriptLoad(filepath)
-      if load.$promise then load.$promise else load
+      if angular.isArray(filepath)
+        promise = []
+        angular.forEach(filepath,(file)->
+          load = new ScriptLoad(file)
+          if load and load.$promise
+            promise.push load.$promise
+        )
+        return $q.all(promise)
+      else 
+        load = new ScriptLoad(filepath)
+        return if load.$promise then load.$promise else load
 
   ]
 
