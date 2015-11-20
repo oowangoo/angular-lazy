@@ -1,23 +1,93 @@
 (function() {
-  var ModuleListenList, appendModuleRequires, coverNgModule, createInvoke, isRegister, moduleProxy, nextTick, register, registerCache;
+  var ModuleListenList, anonFn, appendModuleRequires, coverNgModule, createInvoke, getQueueArguments, hitCache, initRegisterCache, isRegister, moduleProxy, nextTick, putRegisterCache, register, registerCache;
 
   register = angular.module('angular.lazy.register', ['ng']);
 
   register.isBootstrap = false;
 
-  registerCache = {
-    modules: ['ng']
-  };
-
   register.isRegister = isRegister = function(moduleName) {
-    return registerCache.modules.indexOf(moduleName) !== -1;
+    return !!registerCache.module[moduleName];
   };
 
   ModuleListenList = ['provider', 'factory', 'service', 'value', 'constant', 'animation', 'filter', 'controller', 'directive', 'config', 'run'];
 
+  registerCache = {
+    module: {
+      'ng': true
+    }
+  };
+
+  initRegisterCache = function() {
+    var method, _i, _len, _results;
+    registerCache = {
+      module: {
+        'ng': true
+      }
+    };
+    _results = [];
+    for (_i = 0, _len = ModuleListenList.length; _i < _len; _i++) {
+      method = ModuleListenList[_i];
+      _results.push(registerCache[method] = {});
+    }
+    return _results;
+  };
+
+  initRegisterCache();
+
+  getQueueArguments = function(args) {
+    var fn, name;
+    name = args[0];
+    fn = args[1];
+    if (!fn) {
+      fn = name;
+      name = '@';
+    }
+    if (angular.isArray(fn)) {
+      fn = fn[fn.length - 1];
+    }
+    return {
+      name: name,
+      fn: fn
+    };
+  };
+
+  anonFn = function(fn) {
+    return fn.toString();
+  };
+
+  hitCache = function(method, args) {
+    var cache, caches, fn, name;
+    caches = registerCache[method];
+    args = getQueueArguments(args);
+    name = args.name;
+    fn = args.fn;
+    cache = caches[name];
+    if (!cache) {
+      return false;
+    }
+    if (!angular.isArray(cache)) {
+      return true;
+    }
+    return cache.indexOf(anonFn(fn)) > -1;
+  };
+
+  putRegisterCache = function(method, args) {
+    var caches, fn, name;
+    caches = registerCache[method];
+    args = getQueueArguments(args);
+    name = args.name;
+    fn = args.fn;
+    if (['run', 'config', 'directive'].indexOf(method) > -1) {
+      caches[name] = caches[name] || [];
+      caches[name].push(anonFn(fn));
+    } else {
+      caches[name] = true;
+    }
+  };
+
   moduleProxy = function(module) {
     var method, _i, _len;
-    registerCache.modules.push(module.name);
+    registerCache.module[module.name] = true;
     for (_i = 0, _len = ModuleListenList.length; _i < _len; _i++) {
       method = ModuleListenList[_i];
       module[method] = createInvoke(module, method);
@@ -34,7 +104,11 @@
     }
     invokeQueue = function() {
       var result;
+      if (hitCache(method, arguments)) {
+        return module;
+      }
       result = normal.apply(module, arguments);
+      putRegisterCache(method, arguments);
       if (register.isBootstrap) {
         register.register(module, method, arguments);
       }
@@ -110,14 +184,8 @@
           throw new Error("badProvider unsupported provider " + pname);
         }
         return function() {
-          var cacheName, name, rs;
-          name = arguments[0];
-          cacheName = "" + method + name;
-          if (self.enableDistinst && providerCache[cacheName]) {
-            return;
-          }
+          var rs;
           rs = provider[method].apply(provider, arguments);
-          providerCache[cacheName] = rs;
         };
       };
       runLater = function() {

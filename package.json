@@ -1,7 +1,7 @@
 {
   "name": "angular-lazy",
   "description": "lazy load for AngularJS ",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "dependencies": {
     "matchdep": "^0.3.0",
     "ejs-locals": "^1.0.2",
