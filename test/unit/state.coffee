@@ -52,6 +52,7 @@ describe("state",()->
   ))
   it("some resolve require load file ",(done)->
     #when here stateResovle is true
+    window.stateResovle = true
     inject(($state,$rootScope)->
       stateResolve = false
       stateProvider.state("demo",{

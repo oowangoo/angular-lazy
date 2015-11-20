@@ -45,6 +45,31 @@ describe("require",()->
       $rootScope.$digest();
     )
   )
+  it("getFile Array",(done)->
+    inject(($fileLoad,$rootScope,$fileCache)->
+      $fileCache.remove("/base/.compiled/test/module.js")
+      $fileCache.remove("/base/.compiled/test/empty.js")
+      
+      window.lazyLoad = true
+      window.stateResovle = true
+      
+      p = $fileLoad(["/base/.compiled/test/module.js","/base/.compiled/test/empty.js"])
+      expect(p.then).toBeDefined()
+      p.then(()->
+        expect(!window.lazyLoad).toBeTruthy()
+        expect(!window.stateResovle).toBeTruthy()
+      ).catch(()->
+        console.error(["can't load #{path}"])
+        expect(false).toBeTruthy()
+      ).finally(()->
+        done()
+      )
+      $rootScope.$digest();
+
+      $fileCache.remove("/base/.compiled/test/module.js")
+      $fileCache.remove("/base/.compiled/test/empty.js")
+    )
+  )
   describe('provider',()->
     fileProvider = undefined;
     A =  {
