@@ -38,7 +38,7 @@
     var fn, name;
     name = args[0];
     fn = args[1];
-    if (!fn) {
+    if (!angular.isDefined(fn)) {
       fn = name;
       name = '@';
     }
