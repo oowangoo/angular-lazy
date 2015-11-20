@@ -15,6 +15,7 @@ angular.module("normal.test",['ng','angular.lazy.register'])
   return {msg:normal}
 )
 .value("normalValue",normal)
+.value("normalFalse",false)
 .constant("normalConstant",normal)
 .filter("normalFilter",()->
   return (c)->
@@ -109,8 +110,9 @@ describe("register",()->
     ))
   )
   describe('value',()->
-    it("normal",inject((normalValue)->
-      expect(normalValue).toBe(normal)  
+    it("normal",inject((normalValue,normalFalse)->
+      expect(normalValue).toBe(normal)
+      expect(normalFalse).toBeFalsy()  
     ))
     it("lazy",inject(()->
       m = angular.module(moduleName)

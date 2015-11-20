@@ -25,7 +25,7 @@ getQueueArguments = (args)->
   fn = args[1] 
 
   #只有1个参数时，一定是function
-  unless fn
+  if !angular.isDefined(fn)
     fn = name 
     name = '@'
 
