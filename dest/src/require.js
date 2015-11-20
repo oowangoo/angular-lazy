@@ -34,9 +34,9 @@
         } else if (angular.isString(config)) {
           list.push(config);
         } else if (angular.isObject(config)) {
-          list = [];
+          list = {};
           angular.forEach(config, function(v, k) {
-            return Array.prototype.push.apply(list, getRequireList(v));
+            return list[k] = v;
           });
         }
         return list;
