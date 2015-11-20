@@ -96,7 +96,8 @@ module.exports = (grunt)->
         createTag: true,
         tagName: '<%= pkg.version%>',
         tagMessage: 'Version <%= pkg.version%>'
-        push:false
+        push:true
+        pushTo:'origin'
 
   grunt.registerTask "build",[
     'clean:build'
