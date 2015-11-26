@@ -21,7 +21,7 @@
       return $cacheFactory("fileCache");
     }
   ]).provider("$fileLoad", [
-    function() {
+    '$injector', function($injector) {
       var getFilePath, getRequireList, provider;
       getRequireList = function(config) {
         var list;
@@ -78,11 +78,13 @@
                 fileCache.put(filePath, true);
                 $rootScope.$apply();
               };
-              this.onScriptError = function() {
+              this.onScriptError = function(event) {
+                event = event || {};
+                event.filepath = filePath;
                 deferred.reject('bad request');
                 fileCache.remove(filePath);
                 $rootScope.$apply();
-                angular.isFunction(provider.onError) && provider.onError();
+                $rootScope.$emit("$scriptError", event);
               };
               if (!filePath) {
                 deferred.reject('empty path');
