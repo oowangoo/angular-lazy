@@ -84,7 +84,7 @@
                 deferred.reject('bad request');
                 fileCache.remove(filePath);
                 $rootScope.$apply();
-                $rootScope.$emit("$scriptError", event);
+                $rootScope.$emit("$scriptLoadError", event);
               };
               if (!filePath) {
                 deferred.reject('empty path');
