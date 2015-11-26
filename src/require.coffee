@@ -68,7 +68,7 @@ requireModule.factory("$fileCache",["$cacheFactory",($cacheFactory)->
           deferred.reject('bad request'); 
           fileCache.remove(filePath)
           $rootScope.$apply() 
-          $rootScope.$emit("scriptLoadError",event)
+          $rootScope.$emit("$scriptLoadError",event)
           return
         if !filePath
           deferred.reject('empty path')
