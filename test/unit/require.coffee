@@ -120,7 +120,7 @@ describe("require",()->
     ))
     it("onerror",(done)->
       inject(($fileLoad,$rootScope)->
-        $rootScope.$on("$scriptError",(event,errorEvent)->
+        $rootScope.$on("$scriptLoadError",(event,errorEvent)->
           expect(errorEvent).toBeDefined()
           done()
           
