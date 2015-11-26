@@ -11,7 +11,7 @@ requireModule.setConfig = (config)->
 requireModule.factory("$fileCache",["$cacheFactory",($cacheFactory)->
   return $cacheFactory("fileCache")
 ])
-.provider("$fileLoad",[()->
+.provider("$fileLoad",['$injector',($injector)->
   #return paths array 
   getRequireList = (config)->
     return config if angular.isArray(config)
@@ -62,11 +62,13 @@ requireModule.factory("$fileCache",["$cacheFactory",($cacheFactory)->
           $rootScope.$apply() #需要调用$apply 才能将结果传播
           return
 
-        @onScriptError = ()->
+        @onScriptError = (event)->
+          event = event || {}
+          event.filepath = filePath
           deferred.reject('bad request'); 
           fileCache.remove(filePath)
           $rootScope.$apply() 
-          angular.isFunction(provider.onError) and provider.onError()
+          $rootScope.$emit("$scriptError",event)
           return
         if !filePath
           deferred.reject('empty path')

@@ -118,6 +118,16 @@ describe("require",()->
       # expect(array).toContain("highchart-ng-path")
       return
     ))
+    it("onerror",(done)->
+      inject(($fileLoad,$rootScope)->
+        $rootScope.$on("$scriptError",(event,errorEvent)->
+          expect(errorEvent).toBeDefined()
+          done()
+          
+        )
+        $fileLoad('error.js')
+      )
+    )
     return
   )
 )
